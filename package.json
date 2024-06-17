@@ -1,0 +1,26 @@
+{
+  "name": "git-scheduler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.js",
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "bin": {
+    "gsched": "./bin/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc --watch"
+  },
+  "dependencies": {
+    "ajv": "^8.16.0",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "install": "^0.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "typescript": "^5.4.5"
+  }
+}

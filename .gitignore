@@ -1,0 +1,6 @@
+# build and output directories
+bin/
+node_modules/
+
+# misc
+TODO.md
