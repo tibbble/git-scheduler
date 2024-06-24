@@ -1,33 +1,10 @@
 import { exec, spawn } from 'child_process';
 import { Command } from 'commander';
 import chalk from 'chalk';
-import fs from 'fs';
+import { getDate, dateError } from '../../utils/date_utils.js';
+import { emtpyVimMessageError, getVimMessage } from '../../utils/vim_utils.js';
 
 // functions
-
-async function getDate(arg: string) {
-  // https://www.shell-tips.com/linux/how-to-format-date-and-time-in-linux-macos-and-bash/#how-to-format-a-date-in-bash
-  if (arg.match(/^[+]\d+[SMHdwmy]$/) === null) throw invalidDateError;
-  return new Promise<string>((resolve, reject) => {
-    exec(`date -v ${arg}`, (err, stdout, stderr) => (err ? reject(stderr.trim()) : resolve(stdout.trim())));
-  });
-}
-
-async function getVimMessage() {
-  const tempFile = `./vimMessageFile.txt`;
-  const term = spawn('vim', [tempFile], { stdio: 'inherit' });
-  return new Promise<string>((resolve, reject) => {
-    term.on('exit', () => {
-      try {
-        const commit_message = fs.readFileSync(tempFile, 'utf8');
-        fs.unlinkSync(tempFile);
-        resolve(commit_message.trim());
-      } catch {
-        reject();
-      }
-    });
-  });
-}
 
 async function handleExecuteCommit(message: string, date?: string) {
   return new Promise<string>((resolve, reject) => {
@@ -41,19 +18,6 @@ async function handleExecuteCommit(message: string, date?: string) {
 
 // error messages
 
-const invalidDateError =
-  'Invalid date format. Use date command syntax. e.g. +30M, +2H, +3d, +1w, etc. Ensure that all values are positive.';
-
-function dateError(err: string) {
-  err.split('\n').forEach((line) => console.error(`${chalk.redBright('ERR!')} ${line}`));
-}
-
-function emtpyVimMessageError() {
-  console.log(`${chalk.redBright('ERR!')} Provide a commit message to perform this action.`);
-  console.log(`${chalk.redBright('ERR!')} Nothing has been committed or changed.`);
-  console.log(`${chalk.redBright('ERR!')} Exiting...\n`);
-}
-
 function commitError(err: string) {
   err.split('\n').forEach((line) => console.error(`${chalk.redBright('ERR!')} ${line}`));
   console.log(`${chalk.redBright('ERR!')} Commit failed.`);
@@ -64,22 +28,27 @@ function commitError(err: string) {
 
 type CommitOptions = {
   message: string;
-  fastForward: string;
 };
 
+const commandDescription = `Commit your staged files to the repository with a custom date.
+This command is intended to be used for creating commits a few hours or days in the future.
+The date will be set for both the author and committer of the commit.
+${chalk.redBright(
+  'NOTE: commits will be executed, not just scheduled. Any pushes to the repository will push all created commits.'
+)}
+${chalk.redBright('Take care not to push future commits to your repository if you are working in a team.')}`;
+
+const commandArgumentDescription =
+  'specifies a future time offset relative to the current datetime for your git commit. uses date command syntax. e.g. 2H';
+
 export const commit = new Command('commit')
-  .description('Commit your staged files to the repository.')
-  .option('-m, --message <COMMIT MESSAGE>', 'add a message to the commit')
-  .option(
-    '-ff, --fast-forward <AMOUNT>',
-    'specify the amount of time to fast forward to. uses date command syntax. e.g. +2H'
-  )
-  .action(async (options: CommitOptions) => {
+  .description(commandDescription)
+  .argument('<COMMIT OFFSET>', commandArgumentDescription)
+  .option('-m, --message <COMMIT MESSAGE>', 'add a message to the commit. if not provided, a vim editor will open')
+  .action(async (timeInterval, options: CommitOptions) => {
     const commit_message =
       options.message || (await getVimMessage().catch(() => (emtpyVimMessageError(), process.exit(1))));
-    const date =
-      options.fastForward &&
-      (await getDate(options.fastForward).catch((err: string) => (dateError(err), process.exit(1))));
+    const date = await getDate(timeInterval).catch((err: string) => (dateError(err), process.exit(1)));
 
     handleExecuteCommit(commit_message, date)
       .then(() => (console.log(`${chalk.greenBright('Commit executed.')}\n`), process.exit(0)))
