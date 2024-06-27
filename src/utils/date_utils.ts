@@ -3,11 +3,13 @@ import chalk from 'chalk';
 
 // functions
 
-export async function getDate(arg: string) {
+export async function getDate(arg: string, past = false) {
   // https://www.shell-tips.com/linux/how-to-format-date-and-time-in-linux-macos-and-bash/#how-to-format-a-date-in-bash
   if (arg.match(/^\d+[SMHdwmy]$/) === null) throw invalidDateError;
   return new Promise<string>((resolve, reject) => {
-    exec(`date -v +${arg}`, (err, stdout, stderr) => (err ? reject(stderr.trim()) : resolve(stdout.trim())));
+    exec(`date -v ${past ? '-' : '+'}${arg}`, (err, stdout, stderr) =>
+      err ? reject(stderr.trim()) : resolve(stdout.trim())
+    );
   });
 }
 

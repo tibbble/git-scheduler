@@ -28,10 +28,11 @@ function commitError(err: string) {
 
 type CommitOptions = {
   message: string;
+  past: boolean;
 };
 
 const commandDescription = `Commit your staged files to the repository with a custom date.
-This command is intended to be used for creating commits a few hours or days in the future.
+This command is intended to be used for creating commits a few hours or days in the past or future (default future).
 The date will be set for both the author and committer of the commit.
 ${chalk.redBright(
   'NOTE: commits will be executed, not just scheduled. Any pushes to the repository will push all created commits.'
@@ -45,12 +46,13 @@ export const commit = new Command('commit')
   .description(commandDescription)
   .argument('<COMMIT OFFSET>', commandArgumentDescription)
   .option('-m, --message <COMMIT MESSAGE>', 'add a message to the commit. if not provided, a vim editor will open')
+  .option('-p, --past', 'indicate that the commit offset should be in the past. default is future.')
   .action(async (timeInterval, options: CommitOptions) => {
+    const date = await getDate(timeInterval, options.past).catch((err: string) => (dateError(err), process.exit(1)));
     const commit_message =
       options.message || (await getVimMessage().catch(() => (emtpyVimMessageError(), process.exit(1))));
-    const date = await getDate(timeInterval).catch((err: string) => (dateError(err), process.exit(1)));
 
     handleExecuteCommit(commit_message, date)
-      .then(() => (console.log(`${chalk.greenBright('Commit executed.')}\n`), process.exit(0)))
+      .then(() => (console.log(`${chalk.greenBright(`Commit executed for ${date}`)}\n`), process.exit(0)))
       .catch((err) => (commitError(err), process.exit(1)));
   });

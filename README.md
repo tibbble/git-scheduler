@@ -1,9 +1,12 @@
 # Git Scheduler
 
+A CLI interface for altering Git commit datetimes.
+All implemented functionality exists natively in Git, but this package greatly simplifies the process.
+
 ## Features
 
-- Schedule Git commits for future dates and times with an easy-to-use CLI
-- Create sessions for stretching commits over a given time period (30 minutes of code -> 1 day of work)
+- Execute git commits at a specified time
+- Create sessions for stretching commits over a given time period (2 hours of code -> 1 day of work)
 
 ## Installation
 
@@ -14,34 +17,13 @@ To install, follow these steps:
 3. Run `npm run build` to build the project
 4. Run `npm install -g .` to install the CLI globally. The CLI will then be available using the command `gsched`
 
+If you would like to change the command name, you can do so by changing or adding an alias in the `bin` section of `package.json`.
+Make sure to run `npm install -g .` again after making changes.
+To remove the old command name, you can run `npm uninstall -g old-command-name`. You may also want to remove the alias in your /usr/local/bin directory.
+
 ## Usage
 
-### `commit`
-
-Example usage:
-
-```bash
-gsched commit -m "New commit message" -ff +2H
-```
-
-Create a commit with message "New commit message" with a datetime 2 hours in the future.
-Please keep in mind that this command creates the commit. Take care as to not push commits that are still in the future.
-
-### `config`
-
-Example usage:
-
-```bash
-gsched config
-```
-
-See the current configuration settings.
-
-```bash
-gsched config -u workHourEnd 17
-```
-
-Set the work hour end configuration setting to 5 PM.
+This section has not been written yet. Please check back later.
 
 ## FAQ
 
