@@ -15,7 +15,9 @@ To install, follow these steps:
 1. Clone the repository
 2. `npm install`
 3. Run `npm run build` to build the project
-4. Run `npm install -g .` to install the CLI globally. The CLI will then be available using the command `gsched`
+4. Run `npm install -g .` to install the CLI globally. 
+
+The CLI will then be available using the command `gsched`.
 
 If you would like to change the command name, you can do so by changing or adding an alias in the `bin` section of `package.json`.
 
